@@ -2,9 +2,9 @@
   "name": "telegram-media-bot",
   "version": "1.0.0",
   "description": "A Telegram bot for managing media and generating URLs.",
-  "main": "server.js",
+  "main": "lastone.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node lastone.js"
   },
   "engines": {
     "node": ">=14.x"
