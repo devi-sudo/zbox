@@ -1,0 +1,38 @@
+{
+  "name": "telegram-media-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot for managing media and generating URLs.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.x"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^2.1.0",
+    "dotenv": "^17.2.1",
+    "express": "^4.21.2",
+    "firebase-admin": "^13.4.0",
+    "grammy": "^1.38.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "punycode": "^2.3.1",
+    "request": "^2.88.2",
+    "telegraf": "^4.16.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/telegram-media-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "media",
+    "nodejs",
+    "express",
+    "body-parser"
+  ],
+  "author": "Dev Verma",
+  "license": "MIT"
+}
