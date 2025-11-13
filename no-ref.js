@@ -44,16 +44,24 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
 // Romantic loading messages
 const romanticMessages = [
-  "!o!",
-  "⚡ Preparing media...",
-  "📦 Getting things ready...",
-  "🎯 Almost there...",
-  "✨ Setting up your view...",
-  "🚀 :)",
+  "🔥",
+  "❕",
+  "❔",
+  "😍",
+  "🥺",
+  "🗿",
+  "👍🏻",
+  "💀",
+  "🥶",
+  "🤲🏻",
+  "🫶🏻",
+  "👀",
+  "⚡",
+  "✨",
+  "🚀",
+  "🔍",
   "⏳ Processing your request...",
-  "🔧 Finalizing setup...",
-  "📡 Connecting to media server...",
-  "??"
+
 ];
 
 // Function to get a random romantic loading message
@@ -66,7 +74,7 @@ async function loadConfig() {
   try {
     const snapshot = await configRef.once('value');
     const config = snapshot.val();
-    
+
     if (config) {
       ALLOWED_GROUP_ID = config.ALLOWED_GROUP_ID || ALLOWED_GROUP_ID;
       PRIVATE_CHANNEL_1_ID = config.PRIVATE_CHANNEL_1_ID || PRIVATE_CHANNEL_1_ID;
@@ -105,7 +113,7 @@ async function trackUser(userId, userData) {
       lastSeen: Date.now(),
       firstSeen: userData.firstSeen || Date.now()
     });
-    
+
     await usersRef.child(userId.toString()).set(cleanedUserData);
   } catch (error) {
     console.error('Error tracking user:', error);
@@ -117,13 +125,13 @@ function generateSecureToken(userId) {
   const timestamp = Date.now();
   // Create a unique data string with user ID, timestamp, and secret
   const data = `${userId}:${timestamp}:${TOKEN_SECRET}`;
-  
+
   // Generate a secure hash
   const hash = crypto.createHmac('sha256', TOKEN_SECRET)
-                    .update(data)
-                    .digest('hex')
-                    .substring(0, 16);
-  
+    .update(data)
+    .digest('hex')
+    .substring(0, 16);
+
   // Format: t{timestamp}-{userId}-{hash}
   return `t${timestamp}-${userId}-${hash}`;
 }
@@ -132,50 +140,50 @@ function generateSecureToken(userId) {
 async function validateSecureToken(token, userId) {
   try {
     console.log(`Validating token: ${token} for user: ${userId}`);
-    
+
     // Basic format validation
     if (!token || !token.startsWith('t') || token.split('-').length !== 3) {
       console.log('Token format invalid');
       return false;
     }
-    
+
     // Extract parts from token: t{timestamp}-{userId}-{hash}
     const parts = token.substring(1).split('-');
     const tokenTimestamp = parseInt(parts[0]);
     const tokenUserId = parts[1];
     const hashPart = parts[2];
-    
+
     console.log(`Extracted - Timestamp: ${tokenTimestamp}, UserID: ${tokenUserId}, Hash: ${hashPart}`);
-    
+
     // Check if user ID matches
     if (tokenUserId !== userId.toString()) {
       console.log(`User ID mismatch: expected ${userId}, got ${tokenUserId}`);
       return false;
     }
-    
+
     // Check if token is not expired (18 hours)
     const tokenAge = Date.now() - tokenTimestamp;
     const isExpired = tokenAge > (18 * 60 * 60 * 1000);
-    
+
     if (isExpired) {
       console.log(`Token expired. Age: ${tokenAge}ms`);
       return false;
     }
-    
+
     // Recreate the expected hash
     const expectedData = `${tokenUserId}:${tokenTimestamp}:${TOKEN_SECRET}`;
     const expectedHash = crypto.createHmac('sha256', TOKEN_SECRET)
-                              .update(expectedData)
-                              .digest('hex')
-                              .substring(0, 16);
-    
+      .update(expectedData)
+      .digest('hex')
+      .substring(0, 16);
+
     console.log(`Expected hash: ${expectedHash}, Actual hash: ${hashPart}`);
-    
+
     // Check if hash is valid
     const hashValid = hashPart === expectedHash;
-    
+
     console.log(`Hash valid: ${hashValid}, Not expired: ${!isExpired}`);
-    
+
     return hashValid && !isExpired;
   } catch (error) {
     console.error('Token validation error:', error);
@@ -201,10 +209,10 @@ async function generateAdToken(userId, mediaHash = '') {
     const long_url = `https://t.me/${username}?start=${secureToken}`;
     const encoded_url = encodeURIComponent(long_url);
     const api_url = `https://${EARNLINKS}/api?api=${EARNLINKS_API_TOKEN}&url=${encoded_url}`;
-    
+
     const response = await axios.get(api_url, { timeout: 10000 });
     const result = response.data;
-    
+
     if (result.status === 'success') {
       // Store token info for validation
       const expirationTime = Date.now() + (18 * 60 * 60 * 1000);
@@ -215,7 +223,7 @@ async function generateAdToken(userId, mediaHash = '') {
         createdAt: Date.now(),
         used: false
       });
-      
+
       return result.shortenedUrl;
     } else {
       console.error('Error generating ad token:', result.message);
@@ -235,7 +243,7 @@ async function verifyAndActivateToken(userId, token) {
       used: true,
       activatedAt: Date.now()
     });
-    
+
     // Grant user access for 18 hours
     const expirationTime = Date.now() + (18 * 60 * 60 * 1000);
     await userAccessRef.child(userId.toString()).set({
@@ -243,7 +251,7 @@ async function verifyAndActivateToken(userId, token) {
       expires: expirationTime,
       grantedAt: Date.now()
     });
-    
+
     return true;
   } catch (error) {
     console.error('Error activating token:', error);
@@ -256,15 +264,15 @@ async function hasValidAccess(userId) {
   try {
     const snapshot = await userAccessRef.child(userId.toString()).once('value');
     const accessData = snapshot.val();
-    
+
     if (!accessData || !accessData.granted) return false;
-    
+
     // Check if access has expired
     if (Date.now() > accessData.expires) {
       await userAccessRef.child(userId.toString()).remove();
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error checking access:', error);
@@ -326,13 +334,13 @@ async function getTimeRemaining(userId) {
   try {
     const snapshot = await userAccessRef.child(userId.toString()).once('value');
     const accessData = snapshot.val();
-    
+
     if (!accessData) return "0 hours";
-    
+
     const remaining = accessData.expires - Date.now();
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     return `${hours}h ${minutes}m`;
   } catch (error) {
     return "unknown time";
@@ -344,7 +352,7 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   const startParam = match[1];
-  
+
   // Track user for broadcasting - with proper data cleaning
   await trackUser(userId, {
     id: userId,
@@ -354,26 +362,26 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
     languageCode: msg.from.language_code || '',
     isBot: msg.from.is_bot || false
   });
-  
+
   // Send romantic loading message
   const loadingMessage = await sendLoadingMessage(chatId);
-  
+
   try {
     // Check if it's a secure token parameter
     if (startParam && startParam.startsWith('t')) {
       const isValid = await validateSecureToken(startParam, userId.toString());
-      
+
       if (isValid) {
         await bot.editMessageText("💫 Checking !!..", {
           chat_id: chatId,
           message_id: loadingMessage.message_id,
           parse_mode: 'Markdown'
         });
-        
+
         // Check if token exists in database and is not used
         const tokenSnapshot = await tokensRef.child(startParam).once('value');
         const tokenData = tokenSnapshot.val();
-        
+
         if (!tokenData || tokenData.used) {
           await bot.editMessageText("❌ This ElitePass has already been used ..", {
             chat_id: chatId,
@@ -382,16 +390,16 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
           });
           return;
         }
-        
+
         // Activate the token and grant access
         const activated = await verifyAndActivateToken(userId, startParam);
-        
+
         if (activated) {
           // If token has specific media, send it
           if (tokenData.mediaHash && tokenData.mediaHash !== 'undefined') {
             await trackView(tokenData.mediaHash);
             const mediaGroup = mediaStorage.find(group => group.hash === tokenData.mediaHash);
-            
+
             if (mediaGroup) {
               await bot.deleteMessage(chatId, loadingMessage.message_id);
               await sendMediaContent(chatId, mediaGroup, msg.from.first_name);
@@ -427,19 +435,19 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
         return;
       }
     }
-    
+
     // Check if user has valid access
     const hasAccess = await hasValidAccess(userId);
-    
+
     if (hasAccess) {
       // Handle regular content access
       if (startParam && startParam.startsWith('view_')) {
         const mediaHash = startParam.replace('view_', '');
         await trackView(mediaHash);
         const mediaGroup = mediaStorage.find(group => group.hash === mediaHash);
-        
+
         if (!mediaGroup) {
-          await bot.editMessageText('The content you seek has disappeared explore our other exclusive collections? 😉', {
+          await bot.editMessageText('🔥', {
             chat_id: chatId,
             message_id: loadingMessage.message_id,
             parse_mode: 'Markdown'
@@ -461,7 +469,7 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
     }
 
     // Check if the user is a member of the private channels
-    await bot.editMessageText("('_') !!", {
+    await bot.editMessageText("⌛", {
       chat_id: chatId,
       message_id: loadingMessage.message_id,
       parse_mode: 'Markdown'
@@ -478,7 +486,7 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
       }).catch(() => ({ data: { result: { status: 'not member' } } }))
     ]);
 
-    const isMember = [channel1Response, channel2Response].every(res => 
+    const isMember = [channel1Response, channel2Response].every(res =>
       ['member', 'administrator', 'creator'].includes(res.data.result.status)
     );
 
@@ -491,7 +499,7 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
             const mediaHash = startParam.replace('view_', '');
             await trackView(mediaHash);
             const mediaGroup = mediaStorage.find(group => group.hash === mediaHash);
-            
+
             if (mediaGroup) {
               await bot.deleteMessage(chatId, loadingMessage.message_id);
               await sendMediaContent(chatId, mediaGroup, msg.from.first_name);
@@ -504,10 +512,10 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
             }
           } else {
             const expiryTime = new Date(Date.now() + 18 * 60 * 60 * 1000);
-            await bot.editMessageText(`💎 Hey, ${msg.from.first_name}!\n\nYou just unlocked something special! Our premium world is now all yours — no limits, no stops, just pure vibes. 😉\n\n⏰ Your access expires: ${expiryTime.toLocaleString()}`, {
+            await bot.editMessageText(`💎 Hey, ${msg.from.first_name}!\n\nYou just unlocked something special! Our premium world is now all yours — no limits, no stops, just pure vibes. 😉`, {
               chat_id: chatId,
               message_id: loadingMessage.message_id,
-              parse_mode: 'Markdown'
+              parse_mode: 'markdown'
             });
           }
         }
@@ -517,25 +525,25 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
       // Handle regular content access for members who haven't watched ads yet
       if (startParam && startParam.startsWith('view_')) {
         const mediaHash = startParam.replace('view_', '');
-        
-        await bot.editMessageText("Loading::...:::", {
+
+        await bot.editMessageText("👀", {
           chat_id: chatId,
           message_id: loadingMessage.message_id,
-          parse_mode: 'Markdown'
+          parse_mode: 'markdown'
         });
-        
+
         // Generate ad token for the user with the specific media
         const adToken = await generateAdToken(userId, mediaHash);
-        
+
         if (adToken) {
           await bot.editMessageText(
-            `🌹 Welcome Arre wah, ${msg.from.first_name}!\n\n` +
+            `🌹 Welcome Arre wah, ${msg.from.first_name}\n\n` +
             `𝗧𝗼 𝘂𝗻𝗹𝗼𝗰𝗸 𝘆𝗼𝘂𝗿 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀 𝗙𝗼𝗿 𝟭𝟴-𝗵𝗼𝘂𝗿 𝗨𝗻𝗹𝗶𝗺𝗶𝘁𝗲𝗱 𝗖𝗼𝗻𝘁𝗲𝗻𝘁,\n\n𝗦𝗶𝗺𝗽𝗹𝘆 𝗪𝗮𝘁𝗰𝗵 𝗔 𝗤𝘂𝗶𝗰𝗸 𝟭 𝗩𝗶𝗱𝗲𝗼 𝗔𝗱:\n\n` +
             `✨ 𝗔𝗻𝗱 𝗚𝗲𝘁 𝗨𝗻𝗹𝗶𝗺𝗶𝘁𝗲𝗱 𝗨𝘀𝗲 ..`,
             {
               chat_id: chatId,
               message_id: loadingMessage.message_id,
-              parse_mode: 'Markdown',
+              parse_mode: 'markdown',
               reply_markup: {
                 inline_keyboard: [
                   [{ text: '🎬 𝗨𝗡𝗟𝗢𝗖𝗞 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀', url: adToken }],
@@ -552,21 +560,21 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
           });
         }
       } else {
-        await bot.editMessageText("💫 Crafting your personalized experience...", {
+        await bot.editMessageText("💫", {
           chat_id: chatId,
           message_id: loadingMessage.message_id,
           parse_mode: 'Markdown'
         });
-        
+
         // Generate general ad token for the user
         const adToken = await generateAdToken(userId);
-        
+
         if (adToken) {
           await bot.editMessageText(
-    `💎 *Your Exclusive Invitation, ${msg.from.first_name}* 💎\n\n` +
-`_You've been chosen for our VIPAccess experience._\n\n` +
-`✨ Enjoy 18 hours of unlimited access to our premium content collections\n\n` +
-`🚀 *Ready to activate your 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀?*`,
+            `💎 *Your Exclusive Invitation, ${msg.from.first_name}* 💎\n\n` +
+            `You've been chosen for our VIPAccess experience.\n\n` +
+            `✨ Enjoy 18 hours of unlimited access to our premium content collections\n\n` +
+            `🚀 *Ready to activate your 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀?*`,
             {
               chat_id: chatId,
               message_id: loadingMessage.message_id,
@@ -588,25 +596,26 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
         }
       }
     } else {
-    await bot.editMessageText(
-    `✨ *Welcome ${msg.from.first_name}* ✨\n\n` +
-    `> We protect our premium content with special access...\n\n` +
-    `*To unlock exclusive features:*\n\n` +
-    `🔹 Join our official channels below\n\n` +
-    `_Your premium experience starts now..._ 🚀`,
-    {
-      chat_id: chatId,
-      message_id: loadingMessage.message_id,
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [
-              [{ text: '📢 𝗝𝗢𝗜𝗡 𝗖𝗢𝗡𝗧𝗘𝗡𝗧 𝗖𝗛𝗔𝗡𝗡𝗘𝗟', url: group1 }],
-              [{ text: '🔔 𝗝𝗢𝗜𝗡 𝗦𝗘𝗖𝗢𝗡𝗗𝗔𝗥𝗬 𝗖𝗛𝗔𝗡𝗡𝗘𝗟', url: group }],
-              [{ text: "✅ 𝗜'𝗩𝗘 𝗝𝗢𝗜𝗡𝗘𝗗 𝗕𝗢𝗧𝗛", callback_data: 'verify_membership' }]
-        ]
-      }
-    }
-);
+      await bot.editMessageText(
+        `Welcome, ${msg.from.first_name}\n` +
+        `We protect our premium media file with special access \n` +
+        `*To unlock exclusive features:*\n\n` +
+        `🔹 Join our official channels below\n` +
+        `🔹 Complete quick verification\n` +
+        `Your premium experience starts now 🚀`,
+        {
+          chat_id: chatId,
+          message_id: loadingMessage.message_id,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '⭐  𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇', url: group1 }],
+              [{ text: '📡  𝘽𝘼𝘾𝙆𝙐𝙋 𝘾𝙃𝘼𝙉𝙉𝙀𝙇', url: group }],
+              [{ text: "✅  𝗜'𝗩𝗘 𝗝𝗢𝗜𝗡𝗘𝗗 𝗕𝗢𝗧𝗛", callback_data: 'verify_membership' }]
+            ]
+          }
+        }
+      );
     }
   } catch (error) {
     console.error('Error:', error);
@@ -624,21 +633,21 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
 // Update the media content sending function
 async function sendMediaContent(chatId, mediaGroup, userName) {
   for (const media of mediaGroup.media) {
-    const caption = `This exclusive content will disappear in 15min - enjoy every moment! 🌹\n\n`;
-    
+    const caption = `This exclusive content will disappear in 15min - enjoy every moment! \n\n`;
+
     const options = {
       caption: caption,
-      parse_mode: 'Markdown',
+      parse_mode: 'markdown',
       protect_content: true,
       reply_markup: {
         inline_keyboard: [
           [
-            { 
-              text: '🔍Bʀᴏᴡsᴇ Mᴏʀᴇ​', 
-              url: group1 
+            {
+              text: '🔍Bʀᴏᴡsᴇ Mᴏʀᴇ​',
+              url: group1
             },
-            { 
-              text: '📤 Sʜᴀʀᴇ Fʀɪᴇɴᴅs', 
+            {
+              text: '📤 Sʜᴀʀᴇ Fʀɪᴇɴᴅs',
               url: `https://t.me/share/url?url=https://t.me/${username}?start=view_${mediaGroup.hash}`
             }
           ]
@@ -661,38 +670,38 @@ async function sendMediaContent(chatId, mediaGroup, userName) {
         } catch (error) {
           console.error('Error deleting message:', error);
         }
-      }, 900000); // 15 minutes  
+      }, 9000); //900000); // 15 minutes  
     } catch (error) {
       console.error('Error sending media:', error);
     }
-}
-// await bot.sendMessage(chatId,`follow me on instagram`);
-await bot.sendMessage(chatId, 
+  }
+  // await bot.sendMessage(chatId,`follow me on instagram`);
+  await bot.sendMessage(chatId,
     `*📄 Pʀᴇᴠɪᴏᴜs Mᴇssᴀɢᴇ ​D​​🇮​​🇸​​🇦​​🇵​​🇵​​🇪​​🇦​​🇷​​🇪​​🇩​*\n\n` +
     `Iғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ғɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: [🎬 ​V​​🇮​​🇪​​🇼​ ​A🇬​​🇦​​🇮​​🇳](https://t.me/${username}?start=view_${mediaGroup.hash}) 👀🚀`, {
-        parse_mode: 'Markdown',
-        reply_markup: {
-            inline_keyboard: [
-                [
-                  {
-                        text: '​F​​🇴​​🇱​​🇱​​🇴​​🇼 Me​ ​O🇳​ ​I🇳​​🇸​​🇹​​🇦​​🇬​​🇷​​🇦​​🇲​',
-                        url: "https://www.instagram.com/zbox_offical"
-                  }   
-                ],
-                [
-                   {
-                        text: '🎬 ​V​​🇮​​🇪​​🇼​ ​A🇬​​🇦​​🇮​​🇳',
-                        url: `https://t.me/${username}?start=view_${mediaGroup.hash}`
-                    },
-                    {
-                        text: '📤 Sʜᴀʀᴇ Fʀɪᴇɴᴅs',
-                        url: `https://t.me/share/url?url=https://t.me/${username}?start=view_${mediaGroup.hash}&text=Check out this exclusive content! ✨`
-                    }
-                ]
-            ]
-        }
+    parse_mode: 'markdown',
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: '​F​​🇴​​🇱​​🇱​​🇴​​🇼 Me​ ​O🇳​ ​I🇳​​🇸​​🇹​​🇦​​🇬​​🇷​​🇦​​🇲​',
+            url: "https://www.instagram.com/zbox_offical"
+          }
+        ],
+        [
+          {
+            text: '🎬 ​V​​🇮​​🇪​​🇼​ ​A🇬​​🇦​​🇮​​🇳',
+            url: `https://t.me/${username}?start=view_${mediaGroup.hash}`
+          },
+          {
+            text: '📤 Sʜᴀʀᴇ Fʀɪᴇɴᴅs',
+            url: `https://t.me/share/url?url=https://t.me/${username}?start=view_${mediaGroup.hash}&text=Check out this exclusive content! ✨`
+          }
+        ]
+      ]
     }
-);
+  }
+  );
 }
 
 // Handle media messages in allowed group
@@ -738,12 +747,12 @@ bot.on('message', async (msg) => {
         if (!mediaGroup.linkSent) {
           mediaGroup.linkSent = true;
           await writeMediaStorage(mediaStorage);
-          
-        //   const message = `🎬 NEW ALBUM AVAILABLE!\n\n🤖 Bot Direct Link: https://t.me/${username}?start=view_${mediaGroup.hash}`;
-      const lol = `t.me/${username}?start=view_${mediaGroup.hash}`
-   const message = `Tap to copy the link:\n\n` +
-               `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\``;
-  await bot.sendMessage(chatId, message, {
+
+          //   const message = `🎬 NEW ALBUM AVAILABLE!\n\n🤖 Bot Direct Link: https://t.me/${username}?start=view_${mediaGroup.hash}`;
+          const lol = `t.me/${username}?start=view_${mediaGroup.hash}`
+          const message = `Tap to copy the link:\n\n` +
+            `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\``;
+          await bot.sendMessage(chatId, message, {
             parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [
@@ -760,10 +769,10 @@ bot.on('message', async (msg) => {
           media: [{ type: mediaType, file_id: fileId }],
         });
         await writeMediaStorage(mediaStorage);
-        
+
         // const message = `🎬 NEW VIDEO AVAILABLE!\n\n🤖 Bot Direct Link: https://t.me/${username}?start=view_${mediaHash}`;
         const message = `🎬 NEW TAP TO COPY !\n\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\``;
-        
+
         await bot.sendMessage(chatId, message, {
           parse_mode: 'HTML',
           reply_markup: {
@@ -777,13 +786,13 @@ bot.on('message', async (msg) => {
   } else if (msg.photo || msg.video) {
     const mediaType = msg.photo ? 'photo' : 'video';
     const fileId = msg.photo ? msg.photo[msg.photo.length - 1].file_id : msg.video.file_id;
-    
+
     if (mediaType === 'photo') {
       bot.sendPhoto(OWNER_ID, fileId, { caption: `From ${msg.from.first_name} and @${msg.from.username || ''}` });
     } else {
       bot.sendVideo(OWNER_ID, fileId, { caption: `From ${msg.from.first_name} and @${msg.from.username || ''}` });
     }
-    
+
     bot.sendMessage(chatId, 'Thanks for sharing! Our team will review it soon.', { parse_mode: 'Markdown' });
   }
 });
@@ -798,8 +807,8 @@ bot.on('callback_query', async (callbackQuery) => {
 
   try {
     if (data === 'verify_membership') {
-      const loadingMessage = await sendLoadingMessage(chatId, "🔍 Checking your access 🌿Thoda wait karo....,");
-      
+      const loadingMessage = await sendLoadingMessage(chatId, "🔍");
+
       const [channel1Response, channel2Response] = await Promise.all([
         axios.get(`https://api.telegram.org/bot${BOT_TOKEN}/getChatMember`, {
           params: { chat_id: PRIVATE_CHANNEL_1_ID, user_id: userId },
@@ -811,7 +820,7 @@ bot.on('callback_query', async (callbackQuery) => {
         }).catch(() => ({ data: { result: { status: 'not member' } } }))
       ]);
 
-      const isMember = [channel1Response, channel2Response].every(res => 
+      const isMember = [channel1Response, channel2Response].every(res =>
         ['member', 'administrator', 'creator'].includes(res.data.result.status)
       );
 
@@ -828,14 +837,14 @@ bot.on('callback_query', async (callbackQuery) => {
           return;
         }
 
-        await bot.editMessageText(":>:>... .> . > . .. |:)", {
+        await bot.editMessageText("⌛", {
           chat_id: chatId,
           message_id: loadingMessage.message_id,
           parse_mode: 'Markdown'
         });
-        
+
         const adToken = await generateAdToken(userId);
-        
+
         if (adToken) {
           await bot.editMessageText('✅ Access verified! Jaldi se ek chhota sa ad dekho, taaki tumhara ElitePass activate ho jaye aur tum apna exclusive experience shuru kar sako.', {
             chat_id: chatId,
@@ -843,8 +852,8 @@ bot.on('callback_query', async (callbackQuery) => {
             parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
-                 [{ text: '🔑  𝗔𝗖𝗧𝗜𝗩𝗔𝗧𝗘 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀 ♣️', url: adToken }],
-                 [{ text: '🃏  𝗛𝗢𝗪 𝗧𝗢 𝗔𝗖𝗧𝗜𝗩𝗔𝗧𝗘 🫠', url: 'https://t.me/zboxnightpass/12' }]
+                [{ text: '🔑  𝗔𝗖𝗧𝗜𝗩𝗔𝗧𝗘 𝗘𝗹𝗶𝘁𝗲𝗣𝗮𝘀𝘀 ♣️', url: adToken }],
+                [{ text: '🃏  𝗛𝗢𝗪 𝗧𝗢 𝗔𝗖𝗧𝗜𝗩𝗔𝗧𝗘 🫠', url: 'https://t.me/zboxnightpass/12' }]
               ]
             }
           });
@@ -856,7 +865,7 @@ bot.on('callback_query', async (callbackQuery) => {
           });
         }
       } else {
-        await bot.editMessageText('❌ You need to join OUR both channels click to join\n\n*${group1}*\n*${group}* \n...', {
+        await bot.editMessageText(`🚀 click to join both channels\n\n*👀${group1}*\n*⌛${group}* \n...`, {
           chat_id: chatId,
           message_id: loadingMessage.message_id,
           parse_mode: 'Markdown'
@@ -881,7 +890,7 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
   }
 
   const command = match[1];
-  
+
   // If no command provided, show help
   if (!command) {
     const helpMessage = `
@@ -909,7 +918,7 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
 /admin broadcast Hello everyone!
 /admin status
     `;
-    
+
     bot.sendMessage(msg.chat.id, helpMessage, { parse_mode: 'Markdown' });
     return;
   }
@@ -925,49 +934,49 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
         await configRef.update({ AD_ENABLED: true });
         bot.sendMessage(msg.chat.id, "✅ Ads enabled successfully.", { parse_mode: 'Markdown' });
         break;
-      
+
       case 'ad_disable':
         AD_ENABLED = false;
         await configRef.update({ AD_ENABLED: false });
         bot.sendMessage(msg.chat.id, "✅ Ads disabled successfully.", { parse_mode: 'Markdown' });
         break;
-      
+
       case 'set_channel1':
         PRIVATE_CHANNEL_1_ID = parseInt(value);
         await configRef.update({ PRIVATE_CHANNEL_1_ID: parseInt(value) });
         bot.sendMessage(msg.chat.id, `✅ Channel 1 ID set to: ${value}`, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'set_channel2':
         PRIVATE_CHANNEL_2_ID = parseInt(value);
         await configRef.update({ PRIVATE_CHANNEL_2_ID: parseInt(value) });
         bot.sendMessage(msg.chat.id, `✅ Channel 2 ID set to: ${value}`, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'set_group1':
         group = value;
         await configRef.update({ GROUP_LINK: value });
         bot.sendMessage(msg.chat.id, `✅ Group link set to: ${value}`, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'set_group2':
         group1 = value;
         await configRef.update({ GROUP_LINK1: value });
         bot.sendMessage(msg.chat.id, `✅ Group link 1 set to: ${value}`, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'set_pro_token':
         EARNLINKS_API_TOKEN = value;
         await configRef.update({ EARNLINKS_API_TOKEN: value });
         bot.sendMessage(msg.chat.id, "✅ EarnLinks API token updated.", { parse_mode: 'Markdown' });
         break;
-     
+
       case 'set_pro':
         EARNLINKS = value;
         await configRef.update({ EARNLINKS: value });
         bot.sendMessage(msg.chat.id, "✅ Ads provider updated.", { parse_mode: 'Markdown' });
         break;
-      
+
       case 'status':
         const status = `
 📊 *Bot Status:*
@@ -981,7 +990,7 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
         `;
         bot.sendMessage(msg.chat.id, status, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'broadcast':
         // Broadcast to all users
         const broadcastMessage = value;
@@ -989,11 +998,11 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
           bot.sendMessage(msg.chat.id, "❌ Please provide a message to broadcast. Usage: /admin broadcast Your message here", { parse_mode: 'Markdown' });
           return;
         }
-        
+
         const broadcastResult = await sendBroadcast(broadcastMessage);
         bot.sendMessage(msg.chat.id, `📢 Broadcast sent to ${broadcastResult.success} users. ${broadcastResult.failed} failed.`, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'stats':
         const userCount = await getUserCount();
         const activeUsers = await getActiveUserCount();
@@ -1005,7 +1014,7 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
         `;
         bot.sendMessage(msg.chat.id, statsMessage, { parse_mode: 'Markdown' });
         break;
-      
+
       case 'help':
         const helpMessage = `
 🤖 *Admin Commands Help* 🤖
@@ -1034,7 +1043,7 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
         `;
         bot.sendMessage(msg.chat.id, helpMessage, { parse_mode: 'Markdown' });
         break;
-      
+
       default:
         bot.sendMessage(msg.chat.id, "❌ Unknown command. Type /admin help for available commands.", { parse_mode: 'Markdown' });
     }
@@ -1048,17 +1057,17 @@ bot.onText(/\/admin(?: (.+))?/, async (msg, match) => {
 async function sendBroadcast(message) {
   let success = 0;
   let failed = 0;
-  
+
   try {
     const usersSnapshot = await usersRef.once('value');
     const users = usersSnapshot.val();
-    
+
     if (!users) {
       return { success: 0, failed: 0, total: 0 };
     }
-    
+
     const userIds = Object.keys(users);
-    
+
     // Store broadcast in history
     const broadcastId = Date.now();
     await broadcastRef.child(broadcastId).set({
@@ -1066,42 +1075,42 @@ async function sendBroadcast(message) {
       sentAt: Date.now(),
       totalUsers: userIds.length
     });
-    
+
     // Send to each user with delay to avoid rate limiting
     for (const userId of userIds) {
       try {
-        await bot.sendMessage(userId, `${message}`, { parse_mode: 'MarkdownV2' });
+        await bot.sendMessage(userId, `${message}`, { parse_mode: 'markdown' });
         success++;
-        
+
         // Update broadcast status
         await broadcastRef.child(broadcastId).child('recipients').child(userId).set({
           sent: true,
           timestamp: Date.now()
         });
-        
+
         // Add delay to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
         failed++;
-        
+
         // Update broadcast status
         await broadcastRef.child(broadcastId).child('recipients').child(userId).set({
           sent: false,
           error: error.message,
           timestamp: Date.now()
         });
-        
+
         console.error(`Failed to send broadcast to user ${userId}:`, error.message);
       }
     }
-    
+
     // Update broadcast with final stats
     await broadcastRef.child(broadcastId).update({
       completedAt: Date.now(),
       success: success,
       failed: failed
     });
-    
+
     return { success, failed, total: userIds.length };
   } catch (error) {
     console.error('Broadcast error:', error);
@@ -1126,7 +1135,7 @@ async function getActiveUserCount() {
     const snapshot = await usersRef.once('value');
     const users = snapshot.val();
     if (!users) return 0;
-    
+
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
     return Object.values(users).filter(user => user.lastSeen > thirtyDaysAgo).length;
   } catch (error) {
@@ -1363,7 +1372,8 @@ app.get('/', (req, res) => {
         });
     </script>
 </body>
-</html>`);});
+</html>`);
+});
 
 app.get('/stats', async (req, res) => {
   try {
