@@ -609,8 +609,8 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '⭐  𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇', url: group1 }],
-              [{ text: '📡  𝘽𝘼𝘾𝙆𝙐𝙋 𝘾𝙃𝘼𝙉𝙉𝙀𝙇', url: group }],
+              [{ text: '⭐  𝗠𝗔𝗜𝗡 𝗖𝗛𝗔𝗡𝗡𝗘𝗟', url: group1 }],
+              [{ text: '📡  𝗔𝗡𝗢𝗧𝗛𝗘𝗥 𝗖𝗛𝗔𝗡𝗡𝗘𝗟', url: group }],
               [{ text: "✅  𝗜'𝗩𝗘 𝗝𝗢𝗜𝗡𝗘𝗗 𝗕𝗢𝗧𝗛", callback_data: 'verify_membership' }]
             ]
           }
@@ -633,7 +633,7 @@ bot.onText(/\/start(?: (.*))?/, async (msg, match) => {
 // Update the media content sending function
 async function sendMediaContent(chatId, mediaGroup, userName) {
   for (const media of mediaGroup.media) {
-    const caption = `This exclusive content will disappear in 15min - enjoy every moment! \n\n`;
+    const caption = `*ᴛʜɪꜱ ᴇxᴄʟᴜꜱɪᴠᴇ ᴄᴏɴᴛᴇɴᴛ ᴡɪʟʟ ᴅɪꜱᴀᴘᴘᴇᴀʀ ɪɴ 15ᴍɪɴ*\n\n`;
 
     const options = {
       caption: caption,
@@ -670,31 +670,31 @@ async function sendMediaContent(chatId, mediaGroup, userName) {
         } catch (error) {
           console.error('Error deleting message:', error);
         }
-      }, 9000); //900000); // 15 minutes  
+      }, 900000); // 15 minutes  
     } catch (error) {
       console.error('Error sending media:', error);
     }
   }
   // await bot.sendMessage(chatId,`follow me on instagram`);
   await bot.sendMessage(chatId,
-    `*📄 Pʀᴇᴠɪᴏᴜs Mᴇssᴀɢᴇ ​D​​🇮​​🇸​​🇦​​🇵​​🇵​​🇪​​🇦​​🇷​​🇪​​🇩​*\n\n` +
-    `Iғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ғɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: [🎬 ​V​​🇮​​🇪​​🇼​ ​A🇬​​🇦​​🇮​​🇳](https://t.me/${username}?start=view_${mediaGroup.hash}) 👀🚀`, {
+    `*📄 Pʀᴇᴠɪᴏᴜs Mᴇssᴀɢᴇ 𝗗𝗶𝘀𝗮𝗽𝗽𝗲𝗮𝗿𝗲𝗱​*\n\n` +
+    `Iғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ғɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: [🎬𝗩𝗜𝗘𝗪 𝗔𝗚𝗔𝗜𝗡](https://t.me/${username}?start=view_${mediaGroup.hash}) 👀🚀`, {
     parse_mode: 'markdown',
     reply_markup: {
       inline_keyboard: [
         [
           {
-            text: '​F​​🇴​​🇱​​🇱​​🇴​​🇼 Me​ ​O🇳​ ​I🇳​​🇸​​🇹​​🇦​​🇬​​🇷​​🇦​​🇲​',
+            text: 'Fᴏʟʟᴏᴡ Oɴ Iɴꜱᴛᴀ 🚀',
             url: "https://www.instagram.com/zbox_offical"
           }
         ],
         [
           {
-            text: '🎬 ​V​​🇮​​🇪​​🇼​ ​A🇬​​🇦​​🇮​​🇳',
+            text: '🎬 Vɪᴇᴡ Aɢᴀɪɴ',
             url: `https://t.me/${username}?start=view_${mediaGroup.hash}`
           },
           {
-            text: '📤 Sʜᴀʀᴇ Fʀɪᴇɴᴅs',
+            text: '👀 Sʜᴀʀᴇ Fʀɪᴇɴᴅs',
             url: `https://t.me/share/url?url=https://t.me/${username}?start=view_${mediaGroup.hash}&text=Check out this exclusive content! ✨`
           }
         ]
