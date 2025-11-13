@@ -753,7 +753,7 @@ bot.on('message', async (msg) => {
           const message = `Tap to copy the link:\n\n` +
             `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\`\n` + `\`${lol}\``;
           await bot.sendMessage(chatId, message, {
-            parse_mode: 'HTML',
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
                 [{ text: '🤖 Open in Bot', url: `https://t.me/${username}?start=view_${mediaGroup.hash}` }]
@@ -774,7 +774,7 @@ bot.on('message', async (msg) => {
         const message = `🎬 NEW TAP TO COPY !\n\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\`\n` + `\`t.me/${username}?start=view_${mediaHash}\``;
 
         await bot.sendMessage(chatId, message, {
-          parse_mode: 'HTML',
+          parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
               [{ text: '🤖 Open in Bot', url: `https://t.me/${username}?start=view_${mediaHash}` }]
